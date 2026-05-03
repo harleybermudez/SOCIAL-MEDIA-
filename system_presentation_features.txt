@@ -1,0 +1,54 @@
+Unyun System Features Presentation Guide (Including System Logic)
+
+1. Authentication & Session Management
+--------------------------------------
+* Login (Signup, Forgot Password):
+  - Signup Logic: User inputs are sanitized and validated. The password undergoes cryptographic hashing (e.g., using bcrypt) before being stored in the database. A unique user record is created.
+  - Login Logic: The system queries the database for the provided email/username. It then verifies the inputted password against the stored hash. If successful, a secure PHP Session is initialized, storing the User ID to maintain state across pages.
+  - Forgot Password Logic: Generates a secure, randomized, time-sensitive token. This token is saved in the database linked to the user and emailed to them as a link. Clicking the link validates the token's existence and expiration before allowing a password update.
+* Logout & Input Validation (Accepts/Rejects):
+  - Logout Logic: The system executes a command to destroy the active server-side session data and invalidate local authentication cookies, forcing the user back to a logged-out state.
+  - Input Validation Logic: Implemented primarily on the server-side (controller). It uses validation rules (Regex patterns for emails, length checks for passwords). 
+    - Accept: If data passes all rules, it is sanitized (escaping special characters) and processed into the database.
+    - Reject: If rules fail, the transaction is aborted. The system returns an array of specific error messages back to the view, prompting the user to correct the specific fields, simultaneously protecting against SQL Injection and XSS attacks.
+
+2. Main Feed Experience
+-----------------------
+* Left Side-Bar: 
+  - Logic: Implemented as a reusable UI component included in the main layout template. Active state routing logic checks the current URL path against the menu item's target to dynamically apply "active" CSS classes for visual highlighting.
+* Post Modal (Immersive View of the post):
+  - Logic: Instead of a page reload, JavaScript intercepts the post click. It prevents default navigation, reads the Post ID from a data attribute, and manipulates the DOM to display a hidden modal overlay (`z-index`). It then populates this modal with the specific post's data.
+* Engagement (Likes & Comments):
+  - Likes Logic: Triggering a like sends an asynchronous (AJAX) POST request to the server. The server toggles a record in a linking database table (user_id, post_id). The UI instantly increments/decrements the counter without refreshing.
+  - Comments Fetching Logic: An AJAX GET request is made when the modal opens, querying the database for comments tied to that post ID, returning them as JSON to be rendered into the DOM.
+  - Unified Modal Logic: CSS Flexbox/Grid ensures the media container and the fetched comments container sit side-by-side (desktop) or stack (mobile) within the fixed modal wrapper.
+  - Comment Submitting Logic: An AJAX POST request sends the comment text. The server validates, inserts the record, and immediately returns the newly rendered comment HTML, which JavaScript appends to the comment list.
+* Media (Auto Play, Global Mute):
+  - Auto Play Logic: Utilizes the JavaScript `IntersectionObserver` API. It monitors video elements; when a video intersects the visible viewport threshold, it calls `video.play()`, and when it scrolls out, it calls `video.pause()`.
+  - Global Mute Logic: A global JavaScript variable tracks the mute state. All video elements have their `.muted` property synced to this variable. Clicking any Sound Icon toggles this global state, applying the change to all videos currently loaded in the DOM.
+
+3. Quickie (Short-form Reels)
+-----------------------------
+* Scrolling Logic: Employs CSS Scroll Snap (`scroll-snap-type: y mandatory`) to physically lock the viewport to the start of each post container. JavaScript event listeners monitor scroll depth to trigger AJAX requests for the next "page" of Quickies before the user hits the bottom (Infinite Scroll).
+* Media Detection & Player Logic: The system checks the file extension or MIME type stored in the database. The view uses conditional rendering: outputting an `<img>` tag for images or a customized `<video>` tag structure for playable media, ensuring the correct player interface is loaded.
+* Overlays & Sound Icon Logic: 
+  - Overlays: UI elements (creator info, like buttons) use CSS absolute positioning (`position: absolute`) with a higher `z-index` to sit transparently over the relatively positioned (`position: relative`) video container.
+  - Sound Icon: An interactive overlay element that, when clicked, toggles the muted attribute of its specific parent `<video>` element, bypassing the default browser controls.
+
+4. Create Post Tool
+-------------------
+* Image Compression Logic: Before the file is moved to permanent storage, server-side libraries (like PHP's GD library or ImageMagick) intercept the uploaded temporary file. They resample the image, reducing its dimensions or quality factor to optimize file size without losing perceptible visual quality.
+* Video Limiter Logic: A server-side validation check that compares the `$_FILES['video']['size']` (bytes) against a predefined maximum limit (e.g., 30MB). If it exceeds the limit, the upload is rejected with an error message.
+* Audio Trimmer Logic: The client-side interface allows the user to define "start" and "end" timestamps. These integer values are sent to the server alongside the file. The server may either store these timestamps to instruct the player when to start/stop, or (more advanced) use a tool like FFmpeg to physically cut the file.
+* Share as Quickie Logic: A simple UI checkbox. When the form is submitted, if checked, the server inserts a boolean flag (e.g., `is_quickie = 1`) into the post's database row. The feed queries are structured so the "Quickie Feed" only pulls records where this flag is true.
+
+5. Friends System
+-----------------
+* New Friend Request Logic: Clicking the button inserts a record into a `friendships` linking table containing the sender's ID, the receiver's ID, and a status column set to 'pending'.
+* Friend List Logic: The system queries the `friendships` table where the current user's ID matches either column AND the status is 'accepted'. It joins this with the `users` table to fetch and display the profile details of those friends.
+* Removing Friend Logic: An action that executes a SQL `DELETE` command targeting the specific row in the `friendships` table linking the two users, instantly severing the connection in the database.
+
+6. Profile
+----------
+* Edit Profile Logic: An HTML form submits via POST/PUT. The controller receives the data, applies input validation, and executes an `UPDATE` SQL query on the `users` table targeting the active user's row (updating bio, name). If a new avatar is uploaded, it handles the file system movement and updates the file path string in the database.
+* Post Preview Logic: A specific database query selects records from the `posts` table `WHERE user_id = [Profile_Owner_ID]`, ordered by creation date descending. The view loops through this resulting array, outputting a CSS Grid layout consisting only of the post's media thumbnails, hiding text to create a clean visual gallery.
