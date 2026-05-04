@@ -33,8 +33,8 @@
                 <?= esc($email) ?>
             </div>
 
-            <input type="password" name="password" placeholder="New Password" class="bg-gray-50 border border-gray-300 text-sm rounded-sm focus:ring-gray-400 focus:border-gray-400 block w-full p-2.5 outline-none" required>
-            <input type="password" name="confirm_password" placeholder="Confirm New Password" class="bg-gray-50 border border-gray-300 text-sm rounded-sm focus:ring-gray-400 focus:border-gray-400 block w-full p-2.5 outline-none" required>
+            <input type="password" name="password" placeholder="New Password" class="bg-gray-50 border border-gray-300 text-sm rounded-sm focus:ring-gray-400 focus:border-gray-400 block w-full p-2.5 outline-none" required minlength="8">
+            <input type="password" name="confirm_password" placeholder="Confirm New Password" class="bg-gray-50 border border-gray-300 text-sm rounded-sm focus:ring-gray-400 focus:border-gray-400 block w-full p-2.5 outline-none" required minlength="8">
             
             <button type="submit" class="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-bold rounded-lg text-sm w-full py-2.5 mt-2 text-center transition">Reset Password</button>
         </form>

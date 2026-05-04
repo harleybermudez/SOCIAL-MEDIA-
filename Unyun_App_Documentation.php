@@ -171,4 +171,50 @@
  * 
  * This guarantees the JSON generated natively contains all info the Frontend Javascript needs to paint the 
  * display profile picture elegantly without further processing.
+ * 
+ * 
+ * =========================================================
+ * 7. AUTHENTICATION & VALIDATION SECURITY
+ * =========================================================
+ * Unyun handles user authentication centrally in `app/Controllers/Auth.php`.
+ * 
+ * --- Sign Up (Registration) ---
+ * - Username Constraints: Only permit alphanumeric characters (a-z, A-Z, 0-9). Spaces and special characters are explicitly rejected to prevent routing errors. Must be between 3 and 30 characters.
+ * - Email Constraints: Must pass strictly formatted RFC validation (e.g., `user@domain.com`) and must be globally unique in the database (duplicate emails are rejected).
+ * - Password Constraints: A strict minimum of 8 characters is required for registration. All characters and symbols are allowed.
+ * - Validation Setup: Implemented both frontend (HTML5 `<input type="email">`, `minlength`, `pattern`) and backend (CodeIgniter `$this->validate()` using rules like `valid_email`, `is_unique[users.email]`, and `alpha_numeric`).
+ * - Security: Passwords are automatically hashed via native PHP `password_hash()` using the default Bcrypt algorithm before storing. Plain text passwords are NEVER stored.
+ * 
+ * Snippet Example (Backend Validation):
+ *      $rules = [
+ *          'username' => 'required|min_length[3]|alpha_numeric|is_unique[users.username]',
+ *          'email'    => 'required|valid_email|is_unique[users.email]',
+ *          'password' => 'required|min_length[8]'
+ *      ];
+ *      if (!$this->validate($rules)) {
+ *          return redirect()->back()->with('error', implode('<br>', $this->validator->getErrors()));
+ *      }
+ * 
+ * --- Login ---
+ * - Logic: Requires an email and password match. It fetches the email row and compares the typed password directly against the stored hash using `password_verify()`.
+ * - Legacy Support: Login intentionally DOES NOT enforce the 8-character `min_length` rule during the auth check. This guarantees that older accounts (created before the 8-character limit was implemented) are still able to securely log in.
+ * 
+ * Snippet Example (Secure Authentication Check):
+ *      $user = $model->where('email', $this->request->getPost('email'))->first();
+ *      
+ *      // Compare the plaintext typed password to the 60-character Bcrypt hash in the DB
+ *      if ($user && password_verify($this->request->getPost('password'), $user['password'])) {
+ *          // Success! Setup the session.
+ *          session()->set(['user_id' => $user['id'], 'logged_in' => true]);
+ *      }
+ * 
+ * --- Password Reset ---
+ * - Logic: Verifies both `password` and `confirm_password` inputs match exactly.
+ * - Constraints: Enforces the exact same 8-character `min_length` rule as registration. If a legacy user (with a 5-character password) decides to reset their password, they will be forced to upgrade to an 8-character password.
+ * 
+ * Snippet Example (Bcrypt Overwrite):
+ *      // Overwrite the specific user's old password with a newly generated Bcrypt hash
+ *      $model->update($user['id'], [
+ *          'password' => password_hash($password, PASSWORD_DEFAULT)
+ *      ]);
  */

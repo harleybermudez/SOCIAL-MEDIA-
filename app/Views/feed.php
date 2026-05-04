@@ -94,14 +94,11 @@
     <div class="max-w-4xl mx-auto px-6">
         <!-- Links Grid -->
         <div class="flex flex-wrap justify-center gap-x-8 gap-y-4 text-[13px] text-gray-500 font-medium transition-colors">
-            <a href="#" class="hover:text-gray-900">About</a>
-            <a href="#" class="hover:text-gray-900">Help Center</a>
-            <a href="#" class="hover:text-gray-900">Privacy Policy</a>
-            <a href="#" class="hover:text-gray-900">Terms of Service</a>
-            <a href="#" class="hover:text-gray-900">Cookie Settings</a>
-            <a href="#" class="hover:text-gray-900">Community Guidelines</a>
-            <a href="#" class="hover:text-gray-900">Advertising</a>
-            <a href="#" class="hover:text-gray-900">Careers</a>
+            <a href="#" class="hover:text-gray-900">Tallayo, Princess Mae</a>
+            <a href="#" class="hover:text-gray-900">Bermudez, John Harley</a>
+            <a href="#" class="hover:text-gray-900">Acosta, Rjay Luis</a>
+            <a href="#" class="hover:text-gray-900">Batao-ey, Dale</a>
+            <a href="#" class="hover:text-gray-900">Lasan, Steve</a>
         </div>
 
         <div class="mt-10 flex flex-col md:flex-row items-center justify-between border-t border-gray-100 pt-8 gap-4">
@@ -109,7 +106,8 @@
             <div class="flex items-center gap-2">
                 <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-pink-500" style="font-family: inherit;">Unyun</h1>
                 <span class="text-gray-300">|</span>
-                <span class="text-sm text-gray-500"> 2026</span>
+                <span class="text-sm text-gray-500"> MCO-Finals Web Development 2 </span>
+                <span class="text-gray-300">2026</span>
             </div>
 
         </div>
@@ -286,7 +284,7 @@ function showUnifiedModal(postId, withMedia) {
         }
         
     } else {
-        // COMMENT POPUP ONLY
+        // COMMENT-FOCUSED VIEW
         postModalMedia.classList.add('hidden');
         postModalMedia.classList.remove('md:flex', 'flex-col');
         

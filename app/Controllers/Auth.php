@@ -47,6 +47,19 @@ class Auth extends BaseController
      */
     public function store()
     {
+        // 1. Strict Validation Layer
+        $rules = [
+            'username' => 'required|min_length[3]|max_length[30]|alpha_numeric|is_unique[users.username]',
+            'email'    => 'required|valid_email|is_unique[users.email]',
+            'password' => 'required|min_length[8]'
+        ];
+
+        if (!$this->validate($rules)) {
+            // Combine all validation errors into a single string for the flash message
+            $errorString = implode('<br>', $this->validator->getErrors());
+            return redirect()->back()->withInput()->with('error', $errorString);
+        }
+
         $model = new UserModel();
 
         // Retrieve file object from the form input explicitly named 'profile_pic'
@@ -185,8 +198,14 @@ class Auth extends BaseController
         $confirmPassword = $this->request->getPost('confirm_password');
 
         // Validation Layer
-        if ($password !== $confirmPassword) {
-            return redirect()->back()->with('error', 'Passwords do not match.');
+        $rules = [
+            'password'         => 'required|min_length[8]',
+            'confirm_password' => 'required|matches[password]'
+        ];
+
+        if (!$this->validate($rules)) {
+            $errorString = implode('<br>', $this->validator->getErrors());
+            return redirect()->back()->with('error', $errorString);
         }
 
         // Identification Layer
